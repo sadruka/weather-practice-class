@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'hourlyforecast.dart';
 import 'sevendayforecast.dart';
+import 'search_city.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,20 +43,21 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _feelsLike;
   bool _isLoading = false;
 
-  // API URL for weather data
-  final String _url =
-      'https://api.weatherapi.com/v1/current.json?key=a007bc81b7e348ad84360841243011&q=pabna';
+  TextEditingController _searchController = TextEditingController();
+
+  // Base URL for weather data
+  final String _baseUrl =
+      'https://api.weatherapi.com/v1/current.json?key=a007bc81b7e348ad84360841243011&q=';
 
   // Fetch weather data from API
-  Future<void> _fetchWeather() async {
+  Future<void> _fetchWeather(String city) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final response = await http.get(Uri.parse(_url));
+      final response = await http.get(Uri.parse('$_baseUrl$city'));
 
-      // If the request is successful, parse the JSON data
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -68,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
           _isLoading = false;
         });
       } else {
-        // If the request fails
         setState(() {
           _location = null;
           _temperature = null;
@@ -77,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     } catch (e) {
-      // Handle any errors
       setState(() {
         _location = null;
         _temperature = null;
@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchWeather(); // Fetch the weather data when the app starts
+    _fetchWeather('Pabna'); // Default city
   }
 
   @override
@@ -105,8 +105,34 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Enter city name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      if (_searchController.text.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                SearchCity(cityName: _searchController.text),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
             _isLoading
-                ? const CircularProgressIndicator() // Show loading indicator while data is fetching
+                ? const CircularProgressIndicator()
                 : _location != null &&
                         _temperature != null &&
                         _condition != null
@@ -117,7 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ignore: prefer_const_constructors
                                 Text(
                                   'Today Weather Info',
                                   style: const TextStyle(
