@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'hourlyforecast.dart'; // Import the new file for hourly forecast
+import 'hourlyforecast.dart';
+import 'sevendayforecast.dart';
 
 void main() {
   runApp(const MyApp());
@@ -106,7 +107,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             _isLoading
                 ? const CircularProgressIndicator() // Show loading indicator while data is fetching
-                : _location != null && _temperature != null && _condition != null
+                : _location != null &&
+                        _temperature != null &&
+                        _condition != null
                     ? Column(
                         children: [
                           Padding(
@@ -114,6 +117,16 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // ignore: prefer_const_constructors
+                                Text(
+                                  'Today Weather Info',
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
                                 Text(
                                   'Location: $_location',
                                   style: const TextStyle(
@@ -177,6 +190,19 @@ class _MyHomePageState extends State<MyHomePage> {
                               );
                             },
                             child: const Text('View Hourly Forecast'),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SevenDayForecast(),
+                                ),
+                              );
+                            },
+                            child: const Text('View 7-Day Forecast'),
                           ),
                         ],
                       )
